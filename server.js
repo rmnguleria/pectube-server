@@ -60,8 +60,31 @@ router.route('/users')
 			console.log("User created" + user);
 			res.json(user);
 		});
+	})
 
+	.get(function(req,res){
+		User.find(function(err,users){
+			if(err){
+				res.send(err);
+			}
+			console.log("Listing users")
+			res.json(users);
+		})
 	});
+
+//routes that end in /users/:user_id
+router.route('/users/:user_id')
+
+	//get the user with that id (GET http://ip/api/users/:user_id)
+	.get(function(req,res){
+		User.findById(req.params.user_id,function(err,user){
+			if(err){
+				res.send(err);
+			}
+			res.json(user);
+		});
+	});
+
 
 //REGISTER OUR ROUTES
 //all of our routes will be prefixed with /api
