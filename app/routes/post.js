@@ -93,30 +93,32 @@ router.route('/:post_id/addcomment/:user_id')
 				console.log("Failed to find user");
 				res.send(err);
 			}
-		});
-
-		Post.findById(req.params.post_id,'comments',function(err,post){
-			if(err){
-				console.log("Failed to fetch post");
-				res.send(err);
-			}else{
-				
-				if(typeof req.body.text === 'undefined' || req.body.text.length == 0){
-					res.send("Empty Comment not allowed"); 
-				}
-
-				post.comments.push({
-					text: req.body.text,
-					createdBy: req.params.user_id
-				});
-
-				post.save(function(err,post){
+			else{
+				Post.findById(req.params.post_id,'comments',function(err,post){
 					if(err){
-						console.log("Failed to save comment into post");
+						console.log("Failed to fetch post");
 						res.send(err);
 					}else{
-						console.log("Comment saved successfully");
-						res.json(post);
+						
+						if(typeof req.body.text === 'undefined' || req.body.text.length == 0){
+							res.send("Empty Comment not allowed"); 
+						} 
+						else{
+							post.comments.push({
+								text: req.body.text,
+								createdBy: req.params.user_id
+							});
+
+							post.save(function(err,post){
+								if(err){
+									console.log("Failed to save comment into post");
+									res.send(err);
+								}else{
+									console.log("Comment saved successfully");
+									res.send("WooHoo Success bitches !!!")
+								}
+							});
+						}
 					}
 				});
 			}
@@ -144,8 +146,67 @@ router.route('/:post_id/removecomment/:user_id/:comment_id')
 					res.json(post);
 				}
 			}
-		});
+		);
 	});
 
 
+//fetch new comments
+// eg url -> http://localhost:1337/posts/
+router.route('/:post_id/fetchcomments/:timestamp')
+	.get(function(req,res){
+
+		var timestamp = Number(req.params.timestamp);
+		var date = new Date(timestamp).toISOString();
+		var dateObj = new Date(date);
+
+		Post.find({'_id': req.params.post_id} ,'comments',function(err,post){
+			
+			console.log("Fetching comments after " + dateObj.toISOString());
+			
+			var commentsneeded = [];
+
+			console.log("timestamp value :- " + timestamp);
+
+			for(var i=0;i<post[0].comments.length;i++){
+				var cDate = new Date(post[0].comments[i].posted).toISOString();
+				var commentDate = new Date(cDate);
+
+				console.log("Comment :- " + post[0].comments[i].text);
+				console.log("Comment timestamp :- " + commentDate.getTime());
+
+				if(commentDate.getTime() > dateObj.getTime()){
+					console.log(commentDate.getTime() + " " + dateObj.getTime()) ;
+					commentsneeded.push(post[0].comments[i]);
+				}
+			}
+
+			console.log("Comments needed are :- ", commentsneeded); 
+
+			if(err){
+				res.send(err);
+			}
+			res.json(commentsneeded);
+		});
+	});
+
+router.route('/newPosts/club/:club_id/timestamp/:timestamp')
+	.get(function(req,res){
+		var timestamp = Number(req.params.timestamp);
+		var date = new Date(timestamp).toISOString();
+		var dateObj = new Date(date);
+		
+		Post.find(
+			{'club':req.params.club_id, 
+			'createdOn':{$gt: dateObj}
+			}).
+			exec(function(err,posts){
+				if(err){
+					console.log("Error while fetching new posts");
+					res.send(err);
+				}else{
+					console.log("Successfully fetched new posts");
+					res.json(posts);
+				}
+			});
+	});
 module.exports = router;

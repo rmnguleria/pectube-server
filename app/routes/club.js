@@ -49,6 +49,18 @@ router.route('/')
 		});
 	});
 
+router.route('/fetchInfo')
+	.get(function(req,res){
+		Club.find('','clubName description activities achievements heads',function(err,clubs){
+			if(err){
+				res.send(err);
+			}else{
+				console.log("Fetching info about clubs");
+				res.json(clubs);
+			}
+		});
+	});
+
 router.route('/:club_id')
 	
 	// fetch club with club_id

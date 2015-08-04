@@ -1,7 +1,7 @@
 var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 
-var FooditemSchema = new Schema({
+var FoodItemSchema = new Schema({
 	Name:{
 		type: String,
 		required: true
@@ -24,7 +24,11 @@ var FooditemSchema = new Schema({
 		type: Date,
 		default: Date.now,
 		required: true
-	}
+	},
+	Rating:{
+		type: Number
+	},
+	Reviews:[String]
 });
 
 var TakeawaySchema = new Schema({
@@ -32,11 +36,14 @@ var TakeawaySchema = new Schema({
 		type: String,
 		required: true
 	},
-	MenuItems:[FooditemSchema],
+	MenuItems:[FoodItemSchema],
 	open:{
 		type: Boolean,
 		default: false,
 		required: true
+	},
+	closingTime:{
+		type: Date
 	}
 });
 

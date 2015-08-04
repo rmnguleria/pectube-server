@@ -86,9 +86,10 @@ router.route('/:user_id')
 router.route('/:user_id/joinclub/:club_id')
 	.put(function(req,res){
 		
+		var guser = new User();
+
 		Club.findById(req.params.club_id,function(err,club){
 			if(err){
-				console.log('Error finding club ' + err);
 				res.send(err);
 			}
 		});
@@ -99,6 +100,7 @@ router.route('/:user_id/joinclub/:club_id')
 				if(err){
 					res.send(err);
 				}else{
+					guser = user;
 					console.log("Club added to user Object");
 				}
 			}
@@ -111,11 +113,10 @@ router.route('/:user_id/joinclub/:club_id')
 					res.send(err);
 				}else{
 					console.log("User added to club ");
-					res.send("Success");
+					res.json(guser);
 				}
 			}
 		);
-
 	});
 
 router.route('/:user_id/leaveClub/:club_id')
